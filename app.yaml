@@ -1,0 +1,15 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /.*
+  script: opr4917.app
+
+libraries:
+- name: numpy
+  version: "1.6.1"
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<style>
+table {
+    border-collapse: collapse;
+}
+td, th {
+    border: 1px solid #ccc;
+}
+td {
+    padding: 3px 20px 3px 20px
+}
+</style>
+<html>
+    <body>
+        <h1> {{title}} </h1>
+        <form action="{{uri_for('event', event_id='x') if type=='event' else uri_for('team', team_number='x')}}" method="get">
+            <input type="text" id="inputtext" value="{{title}}">
+            <input type="radio" name="uselessname" onclick='this.form.action="{{uri_for("team", team_number="x")}}";'
+                {{"checked" if type=='team' else ""}}>Team
+            <input type="radio" name="uselessname" onclick='this.form.action="{{uri_for("event", event_id="x")}}";'
+                {{"checked" if type=='event' else ""}}>Event<br>
+            <input type="checkbox" name="fouls" value="True" {{"checked" if options.include_fouls else ""}}>Include foul points<br>
+            <input type="checkbox" name="playoffs" value="True" {{"checked" if options.include_playoffs else ""}}>Include playoff scores<br>
+            <input type="checkbox" name="capturebreach" value="True" {{"checked" if options.include_capture_breach else ""}}>Include capture + breach in quals<br>
+            <input onclick='this.form.action=this.form.action.substring(0, this.form.action.length-1);
+            this.form.action+=document.getElementById("inputtext").value;
+            ' type="submit" value="Go">
+        </form>
+        <table border='1'> 
+            {% for key, value in valueDict.items() %}
+            <tr>
+                <td> {{key}} </td>
+                <td> {{value|round(2)}} </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
+{% endautoescape %}
