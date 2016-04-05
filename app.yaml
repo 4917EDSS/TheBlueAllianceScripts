@@ -1,3 +1,5 @@
+application: opr4917
+version: v1b
 runtime: python27
 api_version: 1
 threadsafe: true
