@@ -30,8 +30,9 @@ td {
         <table border='1'> 
             {% for key, value in valueDict.items() %}
             <tr>
+                <td> {{value.rank}} </td>
                 <td> {{key}} </td>
-                <td> {{value|round(2)}} </td>
+                <td> {{value.value|round(2)}} </td>
             </tr>
             {% endfor %}
         </table>

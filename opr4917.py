@@ -46,7 +46,13 @@ def _calculate_opr(parsed_matches, team_list, team_id_map):
     for team, stat in zip(team_list, x):
         stat_dict[team] = stat[0]
 
-    return stat_dict
+    opr_ranking_dict = collections.OrderedDict()
+    i = 1;
+    for team in iter(sorted(stat_dict, key=stat_dict.get, reverse=True)):
+        opr_ranking_dict[team] = {"value": stat_dict[team], "rank": i}
+        i += 1
+        
+    return opr_ranking_dict
 
 # team_number is the string number of the team ("4917")
 def getEvents(team_number):
@@ -155,7 +161,7 @@ class TeamPage(webapp2.RequestHandler):
             try:
                 oprDict[event] = oprs["frc" + team_number]
             except KeyError:
-                oprDict[event] = 0
+                oprDict[event] = {"value": 0, "rank": 0}
                 pass
 
         template_values = {
@@ -174,7 +180,7 @@ class MainPage(webapp2.RequestHandler):
         options = getOptions(self.request)
         oprs = getOprs(event_id, **options)
         oprDict = collections.OrderedDict()
-        for team in iter(sorted(oprs, key=oprs.get, reverse=True)):
+        for team in iter(oprs):
             if team[0] == 'f':
                 outTeam = team[3:]
             else:
