@@ -22,7 +22,9 @@ td {
                 {{"checked" if type=='event' else ""}}>Event<br>
             <input type="checkbox" name="fouls" value="True" {{"checked" if options.include_fouls else ""}}>Include foul points<br>
             <input type="checkbox" name="playoffs" value="True" {{"checked" if options.include_playoffs else ""}}>Include playoff scores<br>
-            <input type="checkbox" name="capturebreach" value="True" {{"checked" if options.include_capture_breach else ""}}>Include capture + breach in quals<br>
+            <input type="checkbox" name="capturebreach" value="True" {{"checked" if options.include_capture_breach else ""}}>Score quals matches as playoffs<br>
+            <input type="radio" name="year" value="2016" {{"checked" if year=="2016" else ""}}>2016
+            <input type="radio" name="year" value="2017" {{"checked" if year=="2017" else ""}}>2017<br>
             <input onclick='this.form.action=this.form.action.substring(0, this.form.action.length-1);
             this.form.action+=document.getElementById("inputtext").value;
             ' type="submit" value="Go">

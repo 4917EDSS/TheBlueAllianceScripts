@@ -55,10 +55,13 @@ def _calculate_opr(parsed_matches, team_list, team_id_map):
     return opr_ranking_dict
 
 # team_number is the string number of the team ("4917")
-def getEvents(team_number):
-    url = "http://www.thebluealliance.com/api/v2/team/frc" + team_number + "/2016/events"
+# year is the string number of the year ("2017")
+def getEvents(team_number, year=None):
+    if not year:
+        year = 2017
+    url = "http://www.thebluealliance.com/api/v2/team/frc" + team_number + "/" + str(year) + "/events"
     headers={"X-TBA-App-Id" : "frc4917:customOPRCalculator:1"}
-    r = urlfetch.fetch(url=url, headers=headers, method='GET')
+    r = urlfetch.fetch(url=url, headers=headers, method='GET', validate_certificate=False)
     contents = json.loads(r.content)
 
     events_list = []
@@ -73,9 +76,10 @@ def getEvents(team_number):
 # include_capture_breach: whether to include capture or breach points for qualification matches
 # include_playoffs: whether to include playoff matches
 def getOprs(event_code, include_fouls=True, include_capture_breach=True, include_playoffs=False):
+    year = event_code[:4]
     url = "http://www.thebluealliance.com/api/v2/event/" + event_code + "/matches"
     headers={"X-TBA-App-Id" : "frc4917:customOPRCalculator:1"}
-    r = urlfetch.fetch(url=url, headers=headers, method='GET')
+    r = urlfetch.fetch(url=url, headers=headers, method='GET', validate_certificate=False)
     contents = json.loads(r.content)
 
     if not contents or isinstance(contents, dict):
@@ -100,15 +104,26 @@ def getOprs(event_code, include_fouls=True, include_capture_breach=True, include
                 blueAllianceScore = blueAllianceStats['totalPoints'] - blueAllianceStats['foulPoints']
 
             if include_capture_breach:
-                if match['comp_level'] == 'qm':
-                    if redAllianceStats['teleopTowerCaptured']:
-                        redAllianceScore += 25
-                    if redAllianceStats['teleopDefensesBreached']:
-                        redAllianceScore += 20
-                    if blueAllianceStats['teleopTowerCaptured']:
-                        blueAllianceScore += 25
-                    if blueAllianceStats['teleopDefensesBreached']:
-                        blueAllianceScore += 20
+                if str(year) == '2016':
+                    if match['comp_level'] == 'qm':
+                        if redAllianceStats['teleopTowerCaptured']:
+                            redAllianceScore += 25
+                        if redAllianceStats['teleopDefensesBreached']:
+                            redAllianceScore += 20
+                        if blueAllianceStats['teleopTowerCaptured']:
+                            blueAllianceScore += 25
+                        if blueAllianceStats['teleopDefensesBreached']:
+                            blueAllianceScore += 20
+                elif str(year) == '2017':
+                    if match['comp_level'] == 'qm':
+                        if redAllianceStats['kPaRankingPointAchieved']:
+                            redAllianceScore += 40
+                        if redAllianceStats['rotorRankingPointAchieved']:
+                            redAllianceScore += 100
+                        if blueAllianceStats['kPaRankingPointAchieved']:
+                            blueAllianceScore += 40
+                        if blueAllianceStats['rotorRankingPointAchieved']:
+                            blueAllianceScore += 100
 
             redAlliance = match['alliances']['red']['teams']
             blueAlliance = match['alliances']['blue']['teams']
@@ -155,7 +170,7 @@ class TeamPage(webapp2.RequestHandler):
     def get(self, team_number):
         options = getOptions(self.request)
         oprDict = collections.OrderedDict()
-        teamEvents = getEvents(team_number)
+        teamEvents = getEvents(team_number, self.request.get('year'))
         for event in teamEvents:
             oprs = getOprs(event, **options)
             try:
@@ -168,6 +183,7 @@ class TeamPage(webapp2.RequestHandler):
             'title': team_number,
             'valueDict': oprDict,
             'type': 'team',
+            'year': self.request.get('year') or '2017',
             'options': options
         }
             
@@ -191,6 +207,7 @@ class MainPage(webapp2.RequestHandler):
             'title': event_id,
             'valueDict': oprDict,
             'type': 'event',
+            'year': self.request.get('year') or '2017',
             'options': options
         }
             
