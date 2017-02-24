@@ -1,3 +1,4 @@
+# I beleive Python 2.7.9 or greater is required for this script
 import requests
 headers={'X-TBA-App-Id' : 'frc4917:customOPRCalculator:1'}
 
@@ -47,17 +48,16 @@ def do_event(event_code, totals, playoffs_only=True):
     totals['ccwm_correct'] += correct
 
 
-for year in range(2002, 2005):
+for year in range(2002, 2017):
     url = 'https://www.thebluealliance.com/api/v2/events/' + str(year)
     r = requests.get(url, headers=headers)
     events_contents = r.json()
 
     totals = {'num_games': 0, 'opr_correct': 0, 'ccwm_correct': 0}
     for event in events_contents:
-        print event['key']
         do_event(event['key'], totals)
 
-    print year
-    print totals
-    print 'OPR ' + str(totals['opr_correct'] / float(totals['num_games']))
-    print 'CCWM ' + str(totals['ccwm_correct'] / float(totals['num_games']))
+    print(year)
+    print(totals)
+    print('OPR ' + str(totals['opr_correct'] / float(totals['num_games'])))
+    print('CCWM ' + str(totals['ccwm_correct'] / float(totals['num_games'])))
