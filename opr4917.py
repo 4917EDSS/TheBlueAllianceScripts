@@ -117,11 +117,11 @@ def getOprs(event_code, include_fouls=True, include_capture_breach=True, include
                 elif str(year) == '2017':
                     if match['comp_level'] == 'qm':
                         if redAllianceStats['kPaRankingPointAchieved']:
-                            redAllianceScore += 40
+                            redAllianceScore += 20
                         if redAllianceStats['rotorRankingPointAchieved']:
                             redAllianceScore += 100
                         if blueAllianceStats['kPaRankingPointAchieved']:
-                            blueAllianceScore += 40
+                            blueAllianceScore += 20
                         if blueAllianceStats['rotorRankingPointAchieved']:
                             blueAllianceScore += 100
 
@@ -210,7 +210,7 @@ class MainPage(webapp2.RequestHandler):
             'year': self.request.get('year') or '2017',
             'options': options
         }
-            
+
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
 
