@@ -223,7 +223,14 @@ class MainPage(webapp2.RequestHandler):
             for t in contents:
                 team = str(t["team_number"])
                 teamOprDict = getTeamsEventToOprMap(team, options, self.request.get('year'))
-                oprs[team] = max(teamOprDict.values())
+                maxval = 0
+                maxrank = 0
+                for key, value in teamOprDict.iteritems():
+                    maxval = max(maxval, value['value'])
+                    if maxval == value['value']:
+                        maxrank = value['rank']
+                oprs[team] = {'rank':maxrank, 'value':maxval}
+
 
         oprDict = collections.OrderedDict()
         for team in iter(oprs):
