@@ -59,9 +59,14 @@ def _calculate_opr(parsed_matches, team_list, team_id_map):
 def getEvents(team_number, year=None):
     if not year:
         year = 2017
-    url = "http://www.thebluealliance.com/api/v2/team/frc" + team_number + "/" + str(year) + "/events"
+    url = "http://www.thebluealliance.com/api/v2/team/frc" + str(team_number) + "/" + str(year) + "/events"
     headers={"X-TBA-App-Id" : "frc4917:customOPRCalculator:1"}
-    r = urlfetch.fetch(url=url, headers=headers, method='GET', validate_certificate=False)
+    for i in range(3):
+        try:
+            r = urlfetch.fetch(url=url, headers=headers, method='GET', validate_certificate=False)
+            break
+        except:
+            pass
     contents = json.loads(r.content)
 
     events_list = []
@@ -79,7 +84,12 @@ def getOprs(event_code, include_fouls=True, include_capture_breach=True, include
     year = event_code[:4]
     url = "http://www.thebluealliance.com/api/v2/event/" + event_code + "/matches"
     headers={"X-TBA-App-Id" : "frc4917:customOPRCalculator:1"}
-    r = urlfetch.fetch(url=url, headers=headers, method='GET', validate_certificate=False)
+    for i in range(3):
+        try:
+            r = urlfetch.fetch(url=url, headers=headers, method='GET', validate_certificate=False)
+            break
+        except:
+            pass
     contents = json.loads(r.content)
 
     if not contents or isinstance(contents, dict):
@@ -165,19 +175,22 @@ def getOptions(request):
     
     return {'include_fouls': include_fouls, 'include_playoffs': include_playoffs, 'include_capture_breach': include_capture_breach}
     
+
+def getTeamsEventToOprMap(team_number, options, year):
+    oprDict = collections.OrderedDict()
+    teamEvents = getEvents(team_number, year)
+    for event in teamEvents:
+        oprs = getOprs(event, **options)
+        try:
+            oprDict[event] = oprs["frc" + str(team_number)]
+        except KeyError:
+            oprDict[event] = {"value": 0, "rank": 0}
+    return oprDict
         
 class TeamPage(webapp2.RequestHandler):
     def get(self, team_number):
         options = getOptions(self.request)
-        oprDict = collections.OrderedDict()
-        teamEvents = getEvents(team_number, self.request.get('year'))
-        for event in teamEvents:
-            oprs = getOprs(event, **options)
-            try:
-                oprDict[event] = oprs["frc" + team_number]
-            except KeyError:
-                oprDict[event] = {"value": 0, "rank": 0}
-                pass
+        oprDict = getTeamsEventToOprMap(team_number, options, self.request.get('year'))
 
         template_values = {
             'title': team_number,
@@ -195,6 +208,30 @@ class MainPage(webapp2.RequestHandler):
     def get(self, event_id):
         options = getOptions(self.request)
         oprs = getOprs(event_id, **options)
+        if not oprs:
+            # Get event
+            url = "http://www.thebluealliance.com/api/v2/event/" + event_id + "/teams"
+            headers={"X-TBA-App-Id" : "frc4917:customOPRCalculator:1"}
+            for i in range(3):
+                try:
+                    r = urlfetch.fetch(url=url, headers=headers, method='GET', validate_certificate=False)
+                    break
+                except:
+                    pass
+            contents = json.loads(r.content)
+            oprs = collections.OrderedDict()
+            for t in contents:
+                team = str(t["team_number"])
+                teamOprDict = getTeamsEventToOprMap(team, options, self.request.get('year'))
+                maxval = 0
+                maxrank = 0
+                for key, value in teamOprDict.iteritems():
+                    maxval = max(maxval, value['value'])
+                    if maxval == value['value']:
+                        maxrank = value['rank']
+                oprs[team] = {'rank':maxrank, 'value':maxval}
+
+
         oprDict = collections.OrderedDict()
         for team in iter(oprs):
             if team[0] == 'f':
