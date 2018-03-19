@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 # I beleive Python 2.7.9 or greater is required for this script
 import requests
 headers={'X-TBA-App-Id' : 'frc4917:customOPRCalculator:1'}
@@ -40,20 +41,29 @@ def do_event(event_code, totals, playoffs_only=True):
     if playoffs_only:
         matches_contents = [x for x in matches_contents if x['comp_level'] != 'qm']
 
+    for match in matches_contents:
+        redAlliance = match['alliances']['red']
+        blueAlliance = match['alliances']['blue']
+        redOpr = get_alliance_stat(stats_contents['oprs'], redAlliance);
+        blueOpr = get_alliance_stat(stats_contents['oprs'], blueAlliance);
+        redCcwm = get_alliance_stat(stats_contents['ccwms'], redAlliance);
+        blueCcwm = get_alliance_stat(stats_contents['ccwms'], blueAlliance);
+        if ((redOpr>blueOpr) != (redCcwm > blueCcwm)):
+            totals['diff_prediction'] += 1
 
-    correct, total = prediction_percentage(stats_contents['oprs'], matches_contents)
-    totals['opr_correct'] += correct
+    opr_correct, total = prediction_percentage(stats_contents['oprs'], matches_contents)
+    totals['opr_correct'] += opr_correct
     totals['num_games'] += total
     correct, total = prediction_percentage(stats_contents['ccwms'], matches_contents)
     totals['ccwm_correct'] += correct
 
 
-for year in range(2002, 2017):
+for year in range(2018, 2019):
     url = 'https://www.thebluealliance.com/api/v2/events/' + str(year)
     r = requests.get(url, headers=headers)
     events_contents = r.json()
 
-    totals = {'num_games': 0, 'opr_correct': 0, 'ccwm_correct': 0}
+    totals = {'num_games': 0, 'opr_correct': 0, 'ccwm_correct': 0, 'diff_prediction': 0}
     for event in events_contents:
         do_event(event['key'], totals)
 
