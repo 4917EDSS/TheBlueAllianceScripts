@@ -6,6 +6,8 @@ import jinja2
 import collections
 from google.appengine.api import urlfetch
 
+CURR_YEAR = '2018'
+
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
@@ -58,7 +60,7 @@ def _calculate_opr(parsed_matches, team_list, team_id_map):
 # year is the string number of the year ("2017")
 def getEvents(team_number, year=None):
     if not year:
-        year = 2017
+        year = 2018
     url = "http://www.thebluealliance.com/api/v2/team/frc" + str(team_number) + "/" + str(year) + "/events"
     headers={"X-TBA-App-Id" : "frc4917:customOPRCalculator:1"}
     for i in range(3):
@@ -196,7 +198,7 @@ class TeamPage(webapp2.RequestHandler):
             'title': team_number,
             'valueDict': oprDict,
             'type': 'team',
-            'year': self.request.get('year') or '2017',
+            'year': self.request.get('year') or CURR_YEAR,
             'options': options
         }
             
@@ -244,7 +246,7 @@ class MainPage(webapp2.RequestHandler):
             'title': event_id,
             'valueDict': oprDict,
             'type': 'event',
-            'year': self.request.get('year') or '2017',
+            'year': self.request.get('year') or CURR_YEAR,
             'options': options
         }
 
