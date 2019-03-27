@@ -24,7 +24,8 @@ td {
             <input type="checkbox" name="playoffs" value="True" {{"checked" if options.include_playoffs else ""}}>Include playoff scores<br>
             <input type="radio" name="year" value="2016" {{"checked" if year=="2016" else ""}}>2016
             <input type="radio" name="year" value="2017" {{"checked" if year=="2017" else ""}}>2017
-            <input type="radio" name="year" value="2018" {{"checked" if year=="2018" else ""}}>2018<br>
+            <input type="radio" name="year" value="2018" {{"checked" if year=="2018" else ""}}>2018
+            <input type="radio" name="year" value="2019" {{"checked" if year=="2019" else ""}}>2019<br>
             <input onclick='this.form.action=this.form.action.substring(0, this.form.action.length-1);
             this.form.action+=document.getElementById("inputtext").value;
             ' type="submit" value="Go">
